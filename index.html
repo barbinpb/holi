@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para ti 😏</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfbf9; 
+            color: #4a4036; 
+            overflow: hidden;
+            touch-action: manipulation; 
+        }
+        
+        .h-screen-ios {
+            height: 100vh;
+            height: 100dvh; 
+        }
+
+        .elegant-shadow {
+            box-shadow: 0 4px 15px rgba(74, 64, 54, 0.08), 0 1px 3px rgba(74, 64, 54, 0.05);
+            border: 1px solid rgba(213, 203, 184, 0.4);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes explodeOut {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; filter: blur(4px); }
+        }
+        .animate-explode {
+            animation: explodeOut 0.3s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .game-btn {
+            position: absolute;
+            transition: all 0.2s ease-out;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .game-btn:active, .btn-active:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+
+<body class="w-full relative flex items-center justify-center bg-[#fcfbf9] text-[#4a4036]">
+
+    <!-- Intro Screen (Motivational Phrase) -->
+    <div id="intro-screen" class="absolute inset-0 h-screen-ios w-full z-30 flex flex-col items-center justify-center px-8 transition-opacity duration-700 bg-[#fcfbf9]">
+        <div class="relative animate-float text-center w-full max-w-sm">
+            <p class="text-xl sm:text-2xl font-medium italic text-[#7a6a5a] mb-10 leading-relaxed">
+              "Tienes esa vibra que hace que todo salga bien. Úsala a tu favor hoy, yo confío en ti. 😌✌️"
+            </p>
+            <button id="start-btn" class="btn-active elegant-shadow bg-[#f4efe6] text-[#4a4036] font-semibold py-3 px-8 rounded-full text-lg transition-colors hover:bg-[#eae3d5] shadow-sm">
+                ¿Empecemos? ✨
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Area (Hidden initially) -->
+    <div id="game-area" class="absolute inset-0 h-screen-ios w-full z-10 overflow-hidden opacity-0 pointer-events-none transition-opacity duration-700">
+        <button id="main-btn" class="game-btn elegant-shadow bg-[#f4efe6] text-[#4a4036] font-semibold py-3 px-6 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg z-50 transition-colors hover:bg-[#eae3d5]">
+            Tócame Feli✨
+        </button>
+        
+        <div id="counter-display" class="absolute top-10 w-full text-center text-[#8c7a6b] font-medium text-xl opacity-0 transition-opacity duration-300 pointer-events-none">
+            ¡Destrúyelos todos! (<span id="count">0</span>)
+        </div>
+    </div>
+
+    <!-- Final Message Area -->
+    <div id="final-message" class="absolute inset-0 h-screen-ios w-full z-0 flex flex-col items-center justify-center px-6 opacity-0 scale-90 transition-all duration-700 ease-out pointer-events-none">
+        <div class="relative animate-float text-center w-full max-w-sm">
+            <h1 class="text-4xl sm:text-5xl font-serif text-[#3e342d] mb-6 tracking-tight drop-shadow-sm">
+                Ya, bueno...
+            </h1>
+
+            <p class="text-xl sm:text-2xl font-medium text-[#4a4036] mb-8 bg-white/60 backdrop-blur-md px-6 py-5 rounded-3xl elegant-shadow">
+                Hay alguien que te quiere  🙄🤎
+            </p>
+            
+            <div class="text-sm text-[#8c7a6b] mt-4 flex flex-col items-center gap-2">
+                <span>(Pero solo un poquito, no te emociones)</span>
+                <span class="text-3xl mt-2">✨✨✨</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const introScreen = document.getElementById('intro-screen');
+            const startBtn = document.getElementById('start-btn');
+            
+            const gameArea = document.getElementById('game-area');
+            const mainBtn = document.getElementById('main-btn');
+            const counterDisplay = document.getElementById('counter-display');
+            const countSpan = document.getElementById('count');
+            
+            const finalMessage = document.getElementById('final-message');
+
+            let phase = 0;
+            let buttonsLeft = 0;
+
+            // Prevent scroll/bounce on iOS
+            document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+
+            // Start Flow
+            startBtn.addEventListener('click', () => {
+                introScreen.classList.add('opacity-0');
+                setTimeout(() => {
+                    introScreen.style.display = 'none';
+                    gameArea.classList.remove('opacity-0', 'pointer-events-none');
+                    mainBtn.classList.add('animate-pop'); // Animate button entrance
+                }, 700);
+            });
+
+            // Game Variables
+            const dodgeMessages = ["¿En serio? 😜", "¡Más rápido! 🏃💨", "Casi... 🤭", "¡Última! 💥"];
+            const spamEmojis = ["🤍", "✨", "💌", "👀", "😏", "🤎", "😜"];
+
+            function moveButtonRandomly(btn) {
+                const maxX = window.innerWidth - 120;
+                const maxY = window.innerHeight - 80;
+
+                const newX = Math.max(20, Math.floor(Math.random() * maxX));
+                const newY = Math.max(80, Math.floor(Math.random() * maxY));
+
+                btn.classList.remove('top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2');
+                
+                btn.style.left = `${newX}px`;
+                btn.style.top = `${newY}px`;
+            }
+
+            function spawnSpamButtons() {
+                const totalSpam = 15;
+                buttonsLeft = totalSpam;
+                
+                counterDisplay.style.opacity = '1';
+                countSpan.innerText = buttonsLeft;
+
+                for (let i = 0; i < totalSpam; i++) {
+                    const btn = document.createElement('button');
+                    const isAlt = Math.random() > 0.5;
+                    const colorClass = isAlt ? 'bg-[#f4efe6] text-[#4a4036]' : 'bg-[#e6dfd3] text-[#3e342d]';
+                    
+                    btn.className = `game-btn elegant-shadow ${colorClass} font-semibold w-14 h-14 rounded-full text-2xl animate-pop absolute flex items-center justify-center hover:bg-[#d5cbb8] transition-colors`;
+                    btn.innerText = spamEmojis[Math.floor(Math.random() * spamEmojis.length)];
+                    
+                    moveButtonRandomly(btn);
+                    
+                    btn.style.animationDelay = `${Math.random() * 0.3}s`;
+
+                    btn.addEventListener('touchstart', (e) => handleSpamClick(e, btn));
+                    btn.addEventListener('mousedown', (e) => handleSpamClick(e, btn));
+
+                    gameArea.appendChild(btn);
+                }
+            }
+
+            function handleSpamClick(e, btn) {
+                e.preventDefault(); 
+
+                btn.classList.remove('animate-pop');
+                btn.classList.add('animate-explode');
+ 
+                setTimeout(() => btn.remove(), 300);
+
+                buttonsLeft--;
+                countSpan.innerText = buttonsLeft;
+
+                if (buttonsLeft <= 0) {
+                    showFinalMessage();
+                }
+            }
+
+            function showFinalMessage() {
+                gameArea.style.opacity = '0';
+                setTimeout(() => {
+                    gameArea.style.display = 'none';
+                    
+                    finalMessage.classList.remove('pointer-events-none', 'opacity-0', 'scale-90');
+                    finalMessage.classList.add('opacity-100', 'scale-100');
+                    
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100, 50, 200]);
+                    }
+                }, 500);
+            }
+
+            const mainBtnAction = (e) => {
+                e.preventDefault();
+
+                if (phase < dodgeMessages.length) {
+                    mainBtn.innerText = dodgeMessages[phase];
+                    moveButtonRandomly(mainBtn);
+                    phase++;
+                    
+                    if (navigator.vibrate) navigator.vibrate(50);
+                } else {
+                    mainBtn.classList.add('animate-explode');
+                    setTimeout(() => mainBtn.remove(), 300);
+                    
+                    setTimeout(spawnSpamButtons, 200);
+                    if (navigator.vibrate) navigator.vibrate([100, 100, 100]);
+                }
+            };
+
+            mainBtn.addEventListener('touchstart', mainBtnAction);
+            mainBtn.addEventListener('mousedown', mainBtnAction);
+        });
+    </script>
+</body>
+</html>
